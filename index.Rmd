@@ -1,0 +1,54 @@
+---
+title       : Survival Analysis Calculator
+subtitle    : Reliability with Less Pain
+author      : David G. Himrich
+job         : Student, Coursera Data Science Specialization
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Why Survival Analysis?
+
+# You may be fooling yourself about reliability
+
+Industries are at different levels of maturity in using quantitative approaches to reliability engineering.
+
+```{r, message=FALSE}
+
+## You need to fix the RDays values, they don't seem right
+load("static_life_data.RData")
+library(survival)
+stat1.fit <- survfit(Surv(time=RDays, event=Failed) ~ 1, static_life_data.df)
+
+plot(stat1.fit, main="Survival Curve", xlab="Run Days", ylab="Proportion Surviving")
+
+```
+
+
+
+
+--- .class #id 
+
+## Slide 2 Title Hear
+
+# Why Did I Make This?
+
+# Why Can't We Just Do it the Old Way?
+
+* Censoring
+
+---
+
+## Slide 3
+
+# Survival Plot
+
+* Plot here
+
+
+
+
