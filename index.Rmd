@@ -15,40 +15,63 @@ knit        : slidify::knit2slides
 
 # You may be fooling yourself about reliability
 
-Industries are at different levels of maturity in using quantitative approaches to reliability engineering.
 
-```{r, message=FALSE}
 
-## You need to fix the RDays values, they don't seem right
-load("static_life_data.RData")
-library(survival)
-stat1.fit <- survfit(Surv(time=RDays, event=Failed) ~ 1, static_life_data.df)
+Suppose we are an equipment supplier for projects in which hardware systems such as motors are installed, run until they fail or are removed for some other reason, and are then replaced. Our life data consists of a mix of times until failure, lives that ended without a failure, and lives that are ongoing. Let's look at a data set of 40 such lives from two projects or "Assets", with run days and variable indicating whether a failure ocurred. What are some ways to summarize these data?
 
-plot(stat1.fit, main="Survival Curve", xlab="Run Days", ylab="Proportion Surviving")
+```{r load data}
+load("static_life_data.RData") # comes in as life_data.df
+knitr::kable(xtabs(~ life_data.df$Asset + life_data.df$Failed), caption="Lives by Project Name and Failed Status")
 
 ```
 
 
+---
 
+## Some "Common-Sense" Methods
+
+People try to average total time per failure, or just the average of the failures:
+
+
+```{r summary 1}
+load("static_life_data.RData") # comes in as life_data.df
+paste("Total Run Days per Failure:", with(life_data.df, round(sum(RDays)/sum(Failed==TRUE))))
+
+```
+
+If there are many lives that are "censored" (meaning they did not run until failure) then this method can lead to absurd results. The longest life in this data set is 336 days. It seems odd for 314 days to be a typical life. 
+
+```{r}
+paste("Average Run Days of Failed Motors:", round(mean(life_data.df$RDays[life_data.df$Failed == TRUE])))
+
+```
+
+This average tells us something about the motors that failed, but it ignores all the motors that didn't fail, including several with lives exceeding this average.
 
 --- .class #id 
 
-## Slide 2 Title Hear
+## Slide 4 Title Here
 
-# Why Did I Make This?
+```{r survtable}
+load("static_life_data.RData") # comes in as life_data.df
+library(survival)
+stat1.fit <- survfit(Surv(time=RDays, event=Failed) ~ 1, life_data.df)
+summary(stat1.fit)
 
-# Why Can't We Just Do it the Old Way?
+```
 
-* Censoring
 
 ---
 
-## Slide 3
-
-# Survival Plot
-
-* Plot here
+## Slide 5
 
 
+```{r, message=FALSE, fig.height=4, fig.width=6}
+load("static_life_data.RData") # comes in as life_data.df
+library(survival)
+stat1.fit <- survfit(Surv(time=RDays, event=Failed) ~ 1, life_data.df)
+plot(stat1.fit, main="Survival Curve", xlab="Run Days", ylab="Proportion Surviving")
+
+```
 
 
