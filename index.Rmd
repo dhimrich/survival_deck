@@ -15,13 +15,12 @@ knit        : slidify::knit2slides
 
 # You may be fooling yourself about reliability
 
-
-
 Suppose we are an equipment supplier for projects in which hardware systems such as motors are installed, run until they fail or are removed for some other reason, and are then replaced. Our life data consists of a mix of times until failure, lives that ended without a failure, and lives that are ongoing. Let's look at a data set of 40 such lives from two projects or "Assets", with run days and variable indicating whether a failure ocurred. What are some ways to summarize these data?
 
 ```{r load data}
 load("static_life_data.RData") # comes in as life_data.df
-knitr::kable(xtabs(~ life_data.df$Asset + life_data.df$Failed), caption="Lives by Project Name and Failed Status")
+knitr::kable(xtabs(~ life_data.df$Asset + life_data.df$Failed), 
+             caption="Lives by Project Name and Failed Status")
 
 ```
 
@@ -40,8 +39,8 @@ paste("Total Run Days per Failure:", with(life_data.df, round(sum(RDays)/sum(Fai
 ```
 
 If there are many lives that are "censored" (meaning they did not run until failure) then this method can lead to absurd results. The longest life in this data set is 336 days. It seems odd for 314 days to be a typical life. 
-
-```{r}
+```{r summary 2}
+load("static_life_data.RData") # comes in as life_data.df
 paste("Average Run Days of Failed Motors:", round(mean(life_data.df$RDays[life_data.df$Failed == TRUE])))
 
 ```
@@ -50,28 +49,37 @@ This average tells us something about the motors that failed, but it ignores all
 
 --- .class #id 
 
-## Slide 4 Title Here
+## Survival Analysis Makes More Sense
+Using standard methods such as the survfit function in the R statistical programming language to produce [Kaplan-Meier estimates](http://en.wikipedia.org/wiki/Kaplan-Meier_estimator) of reliability produces compact and useful information, such as this survival table, summarized at specific times:
 
 ```{r survtable}
 load("static_life_data.RData") # comes in as life_data.df
 library(survival)
 stat1.fit <- survfit(Surv(time=RDays, event=Failed) ~ 1, life_data.df)
-summary(stat1.fit)
+summary(stat1.fit, time=c(90, 180, 270, 365))
 
 ```
 
+Since the method has been standardized for many years, it is available in many software products ... _if you know how to use those products!_
 
 ---
 
-## Slide 5
+## There's an App for that!
 
+The [Survival Analysis Calculator](http://dhimrich.shinyapps.io/CourseraSurvival/) puts the power and convenience of survival analysis with R in the hands of anyone with a web browser. Future versions will enable users to upload data sets and select more options for output. Please give the demonstrator a try, and see how easy it is to produce survival tables and standard survival curve plots that are so helpful in visualizing reliability peformance:
 
-```{r, message=FALSE, fig.height=4, fig.width=6}
+```{r plots, message=FALSE, echo=FALSE, fig.height=4, fig.width=10}
 load("static_life_data.RData") # comes in as life_data.df
 library(survival)
 stat1.fit <- survfit(Surv(time=RDays, event=Failed) ~ 1, life_data.df)
-plot(stat1.fit, main="Survival Curve", xlab="Run Days", ylab="Proportion Surviving")
+stat2.fit <- survfit(Surv(time=RDays, event=Failed) ~ Asset, life_data.df)
+par(mfrow = c(1,2))
+plot(stat1.fit, main="Survival Curve", xlab="Run Days", 
+     ylab="Proportion Surviving")
+plot(stat2.fit, main="Survival by Asset", xlab="Run Days",
+     ylab="Proportion Surviving", col=1:2, lwd=2)
+legend("bottomleft", legend=unique(life_data.df$Asset), text.col=1:2)
 
 ```
 
-
+The GitHub repository for this RStudio Shiny App is [here](https://github.com/dhimrich/CourseraSurvivalApp), and I'd like to hear what you think!
